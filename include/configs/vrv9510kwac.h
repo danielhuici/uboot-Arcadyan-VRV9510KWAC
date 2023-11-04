@@ -26,8 +26,9 @@
 #define CONFIG_SYS_NAND_PAGE_COUNT	64
 #define CONFIG_SYS_NAND_PAGE_SIZE	2048
 #define CONFIG_SYS_NAND_OOBSIZE		64
-#define CONFIG_SYS_NAND_BLOCK_SIZE	(128 * 1024) /* 128kb */
+#define CONFIG_SYS_NAND_BLOCK_SIZE	(128 * 1024) /* 128 KB */
 #define CONFIG_SYS_NAND_5_ADDR_CYCLE
+#define CONFIG_SYS_BOOTM_LEN          0x1000000       /* 16 MB */
 
 #define CONFIG_LTQ_SPL_COMP_LZO
 #define CONFIG_LTQ_SPL_CONSOLE
@@ -57,7 +58,7 @@
 #define CONFIG_ENV_SIZE			(128 * 1024)
 #define MTDIDS_DEFAULT			"nand0=nand-xway"
 #define MTDPARTS_DEFAULT		\
-	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),3m(kernel),-(ubi)"
+	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),4m(kernel),-(ubi)"
 #else
 #define CONFIG_ENV_IS_NOWHERE
 #define MTDPARTS_DEFAULT		"mtdparts="
