@@ -1,7 +1,8 @@
 /*
  * Copyright (C) 2013 Luka Perkov <luka@openwrt.org>
- * Copyright (C) 2012-2015 Daniel Schwierzeck, daniel.schwierzeck@gmail.com
- *
+ * Copyright (C) 2012-2015 Daniel Schwierzeck, <daniel.schwierzeck@gmail.com>
+ * Copyright (C) 2022-2023 Daniel Huici, <danielhuici@hotmail.com>
+ * 
  * SPDX-License-Identifier:	GPL-2.0+
  */
 
@@ -17,7 +18,7 @@
 #define CONFIG_LTQ_SUPPORT_ETHERNET	/* Enable ethernet */
 #define CONFIG_FW_VRX200_PHY11G_A1X
 
-#define CONFIG_LTQ_SUPPORT_NAND_FLASH		/* Have a K9F1G08U0D NAND flash */
+#define CONFIG_LTQ_SUPPORT_NAND_FLASH		/* Have a ZENTEL A5U1GA31ATS 8G NAND flash */
 #define CONFIG_SYS_NAND_USE_FLASH_BBT
 
 #define CONFIG_LTQ_SUPPORT_SPL_NAND_FLASH	/* Build NAND flash SPL */
@@ -25,7 +26,7 @@
 #define CONFIG_SYS_NAND_PAGE_COUNT	64
 #define CONFIG_SYS_NAND_PAGE_SIZE	2048
 #define CONFIG_SYS_NAND_OOBSIZE		64
-#define CONFIG_SYS_NAND_BLOCK_SIZE	(128 * 1024)
+#define CONFIG_SYS_NAND_BLOCK_SIZE	(128 * 1024) /* 128kb */
 #define CONFIG_SYS_NAND_5_ADDR_CYCLE
 
 #define CONFIG_LTQ_SPL_COMP_LZO
@@ -49,27 +50,18 @@
 #define CONFIG_SPL_MC_TUNE_OFFS		0x5800
 #define CONFIG_SPL_U_BOOT_OFFS		0x20000
 #define CONFIG_SPL_U_BOOT_SIZE		0x44000
-
-#if defined(CONFIG_SYS_BOOT_NANDSPL)
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_ENV_OFFSET		0x80000
 #define CONFIG_ENV_SECT_SIZE		(128 * 1024)
 #define CONFIG_ENV_SIZE			(128 * 1024)
-#else
-#define CONFIG_ENV_IS_NOWHERE
-#endif
-
+#define MTDIDS_DEFAULT			"nand0=nand-xway"
 #define MTDPARTS_DEFAULT		\
 	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),3m(kernel),-(ubi)"
 #else
 #define CONFIG_ENV_IS_NOWHERE
-
 #define MTDPARTS_DEFAULT		"mtdparts="
 #endif
-
-#define MTDIDS_DEFAULT			"nand0=nand-xway"
-
 
 /* Console */
 #define CONFIG_LTQ_ADVANCED_CONSOLE
@@ -77,11 +69,11 @@
 #define CONFIG_CONSOLE_ASC		1
 #define CONFIG_BOOTDELAY 3 
 
-
 /* Commands */
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_MISC
 #define CONFIG_CMD_ECHO
+#define CONFIG_CMD_TFTPPUT
 
 /* Boot */
 #define CONFIG_MIPS_BOOT_FDT
@@ -97,6 +89,13 @@
 	"mtdids="MTDIDS_DEFAULT"\0"		\
 	"mtdparts="MTDPARTS_DEFAULT"\0"
 
+/* Ethernet */
+#if defined(CONFIG_LTQ_SUPPORT_ETHERNET)
+#define CONFIG_ETHADDR		00:01:02:03:04:05
+#define CONFIG_SERVERIP		192.168.1.2
+#define CONFIG_IPADDR		192.168.1.1
+#endif
+
 /* Pull in default board configs for Lantiq XWAY VRX200 */
 #include <asm/lantiq/config.h>
 #include <asm/arch/config.h>
@@ -105,7 +104,6 @@
 	CONFIG_ENV_LANTIQ_DEFAULTS	\
 	CONFIG_ENV_MTDPARTS
 
-#define CONFIG_BOOTCOMMAND "bootm $fileaddr"
-#define CONFIG_BOOTCMD "bootm $fileaddr"
+
 
 #endif /* __CONFIG_H */
