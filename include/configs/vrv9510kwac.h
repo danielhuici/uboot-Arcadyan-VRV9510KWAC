@@ -49,14 +49,18 @@
 #define CONFIG_SPL_U_BOOT_OFFS		0x20000
 #define CONFIG_SPL_U_BOOT_SIZE		0x44000
 
-#define CONFIG_ENV_IS_IN_UBI
+#if defined(CONFIG_SYS_BOOT_NANDSPL)
+#define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OVERWRITE
-#define CONFIG_ENV_UBI_PART		"ubi"
-#define CONFIG_ENV_UBI_VOLUME		"uboot_env"
-#define CONFIG_ENV_UBI_VID_HDR_OFF	"2048"
+#define CONFIG_ENV_OFFSET		0x80000
+#define CONFIG_ENV_SECT_SIZE	(128 * 1024) /* --- 128kb ---*/
+#define CONFIG_ENV_SIZE			(128 * 1024)
+#else
+#define CONFIG_ENV_IS_NOWHERE
+#endif
 
 #define MTDPARTS_DEFAULT		\
-	"mtdparts=nand-xway:512k(uboot_fix),-(ubi)"
+	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),3m(kernel),-(ubi)"
 #else
 #define CONFIG_ENV_IS_NOWHERE
 
@@ -64,7 +68,7 @@
 #endif
 
 #define MTDIDS_DEFAULT			"nand0=nand-xway"
-#define CONFIG_ENV_SIZE			(8 * 1024)
+
 
 /* Console */
 #define CONFIG_LTQ_ADVANCED_CONSOLE
