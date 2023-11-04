@@ -7,11 +7,16 @@
 
 #include <common.h>
 #include <asm/gpio.h>
+#include <asm/arch/gpio.h>
 #include <asm/lantiq/eth.h>
 #include <asm/lantiq/chipid.h>
 #include <asm/lantiq/cpu.h>
 #include <asm/lantiq/mem.h>
 #include <asm/arch/gphy.h>
+
+#define GPIO_SERVICE_BUTTON 22
+#define GPIO_POWER_LED 38
+#define GPIO_SERVICE_LED 41
 
 #if defined(CONFIG_SPL_BUILD)
 #define do_gpio_init	1
@@ -54,6 +59,23 @@ int board_early_init_f(void)
 	if (do_dcdc_init)
 		ltq_dcdc_init(0x7F);
 
+
+	return 0;
+}
+
+int board_late_init(void)
+{
+	gpio_request(GPIO_SERVICE_LED, "");
+	gpio_request(GPIO_POWER_LED, "");
+	gpio_direction_output(GPIO_POWER_LED, 0);
+	if (!gpio_get_value(GPIO_SERVICE_BUTTON)) {
+		printf("Service button pressed! launching firmware via tftpboot...\n");
+		gpio_direction_output(GPIO_SERVICE_LED, 0);
+		setenv("bootcmd", "tftpboot rescue.bin; bootm $fileaddr");
+	} else {
+		setenv("bootcmd", "nboot");
+	}
+
 	return 0;
 }
 
@@ -70,18 +92,19 @@ int misc_init_r(void)
 	return mc_tune_store_flash();
 }
 
+/* WAN and LAN1 ports (phy internal) not working */
 static const struct ltq_eth_port_config eth_port_config[] = {
-	/* GMAC0: external Lantiq PEF7071 10/100/1000 PHY for LAN port 0 */
+	/* GMAC0: external Lantiq PEF7071 10/100/1000 PHY for LAN port 3 */
 	{ 0, 0x0, LTQ_ETH_PORT_PHY, PHY_INTERFACE_MODE_RGMII },
-	/* GMAC1: external Lantiq PEF7071 10/100/1000 PHY for LAN port 1 */
+	/* GMAC1: external Lantiq PEF7071 10/100/1000 PHY for LAN port 2 */
 	{ 1, 0x1, LTQ_ETH_PORT_PHY, PHY_INTERFACE_MODE_RGMII },
-	/* GMAC2: internal GPHY0 with 10/100/1000 firmware for LAN port 2 */
+	/* GMAC2: internal GPHY0 with 10/100/1000 firmware for LAN port 1 */
 	{ 2, 0x11, LTQ_ETH_PORT_PHY, PHY_INTERFACE_MODE_GMII },
 	/* GMAC3: unused */
 	{ 3, 0x0, LTQ_ETH_PORT_NONE, PHY_INTERFACE_MODE_NONE },
-	/* GMAC4: internal GPHY1 with 10/100/1000 firmware for LAN port 3 */
+	/* GMAC4: internal GPHY1 with 10/100/1000 firmware for WAN port */
 	{ 4, 0x13, LTQ_ETH_PORT_PHY, PHY_INTERFACE_MODE_GMII },
-	/* GMAC5: external Lantiq PEF7071 10/100/1000 PHY for WANoE port */
+	/* GMAC5: external Lantiq PEF7071 10/100/1000 PHY for LAN 4 */
 	{ 5, 0x5, LTQ_ETH_PORT_PHY, PHY_INTERFACE_MODE_RGMII },
 };
 

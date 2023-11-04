@@ -42,6 +42,7 @@
 #define CONFIG_RBTREE
 
 /* Environment */
+#define CONFIG_BOARD_LATE_INIT
 #if defined(CONFIG_SYS_BOOT_NANDSPL)
 #define CONFIG_SPL_TPL_OFFS		0x800
 #define CONFIG_SPL_TPL_SIZE		0x5000
@@ -53,7 +54,7 @@
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_ENV_OFFSET		0x80000
-#define CONFIG_ENV_SECT_SIZE	(128 * 1024) /* --- 128kb ---*/
+#define CONFIG_ENV_SECT_SIZE		(128 * 1024)
 #define CONFIG_ENV_SIZE			(128 * 1024)
 #else
 #define CONFIG_ENV_IS_NOWHERE
@@ -74,6 +75,8 @@
 #define CONFIG_LTQ_ADVANCED_CONSOLE
 #define CONFIG_BAUDRATE			115200
 #define CONFIG_CONSOLE_ASC		1
+#define CONFIG_BOOTDELAY 3 
+
 
 /* Commands */
 #define CONFIG_CMD_PING
@@ -101,5 +104,8 @@
 #define CONFIG_EXTRA_ENV_SETTINGS	\
 	CONFIG_ENV_LANTIQ_DEFAULTS	\
 	CONFIG_ENV_MTDPARTS
+
+#define CONFIG_BOOTCOMMAND "bootm $fileaddr"
+#define CONFIG_BOOTCMD "bootm $fileaddr"
 
 #endif /* __CONFIG_H */
