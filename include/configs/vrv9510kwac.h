@@ -44,25 +44,30 @@
 #define CONFIG_RBTREE
 
 /* Environment */
-#define CONFIG_BOARD_LATE_INIT
 #if defined(CONFIG_SYS_BOOT_NANDSPL)
 #define CONFIG_SPL_TPL_OFFS		0x800
 #define CONFIG_SPL_TPL_SIZE		0x5000
 #define CONFIG_SPL_MC_TUNE_OFFS		0x5800
 #define CONFIG_SPL_U_BOOT_OFFS		0x20000
-#define CONFIG_SPL_U_BOOT_SIZE		0x44000
+#define CONFIG_SPL_U_BOOT_SIZE		0x60000
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_ENV_OFFSET		0x80000
 #define CONFIG_ENV_SECT_SIZE		(128 * 1024)
-#define CONFIG_ENV_SIZE			(128 * 1024)
-#define MTDIDS_DEFAULT			"nand0=nand-xway"
 #define MTDPARTS_DEFAULT		\
-	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),4m(kernel),-(ubi)"
+	"mtdparts=nand-xway:512k(uboot),128k(uboot_env),4m(kernel),122m(ubi),4k(board_config)"
+#define CONFIG_ENV_FIRSTBOOT \
+	"first-boot=1\0"
+
 #else
 #define CONFIG_ENV_IS_NOWHERE
 #define MTDPARTS_DEFAULT		"mtdparts="
+#define CONFIG_ENV_FIRSTBOOT \
+	"first-boot=0\0"
 #endif
+
+#define CONFIG_ENV_SIZE			(128 * 1024)
+#define MTDIDS_DEFAULT			"nand0=nand-xway"
 
 /* Console */
 #define CONFIG_LTQ_ADVANCED_CONSOLE
@@ -75,6 +80,19 @@
 #define CONFIG_CMD_MISC
 #define CONFIG_CMD_ECHO
 #define CONFIG_CMD_TFTPPUT
+#define CONFIG_CMD_MOVE_BOARDCONFIG		 \
+	"move-boardconfig=nand read 0x81000000 0x0 0x16e1000 && " \
+	"nand erase 0x7ea0000 0x1000 && " \
+	"nand write 0x826e0000 0x7ea0000 0x1000 && " \
+	"setenv first-boot 0 && " \
+	"saveenv\0" 
+#define CONFIG_CMD_LOAD_TFTP_IMAGE		 \
+	"rescue-tftp=sleep 5;" \
+	"tftpboot rescue.bin &&" \
+	"bootm $fileaddr\0" 
+#define CONFIG_CMD_BOOTNAND \
+	"sysboot=nand read 0x81000000 0xa0000 0x400000 && "\
+	"bootm 0x81000000\0"
 
 /* Boot */
 #define CONFIG_MIPS_BOOT_FDT
@@ -82,13 +100,14 @@
 #define CONFIG_OF_LIBFDT
 #define CONFIG_LZMA
 #define CONFIG_LZO
+#define CONFIG_BOARD_LATE_INIT
 
 /* Environment */
 #define CONFIG_LOADADDR			CONFIG_SYS_LOAD_ADDR
 
 #define CONFIG_ENV_MTDPARTS			\
 	"mtdids="MTDIDS_DEFAULT"\0"		\
-	"mtdparts="MTDPARTS_DEFAULT"\0"
+	"mtdparts="MTDPARTS_DEFAULT"\0" 
 
 /* Ethernet */
 #if defined(CONFIG_LTQ_SUPPORT_ETHERNET)
@@ -103,8 +122,11 @@
 
 #define CONFIG_EXTRA_ENV_SETTINGS	\
 	CONFIG_ENV_LANTIQ_DEFAULTS	\
-	CONFIG_ENV_MTDPARTS
-
-
+	CONFIG_ENV_MTDPARTS \
+	CONFIG_ENV_FIRSTBOOT \
+	CONFIG_CMD_MOVE_BOARDCONFIG \
+	CONFIG_CMD_LOAD_TFTP_IMAGE \
+	CONFIG_CMD_BOOTNAND \
+	CONFIG_ENV_FIRSTBOOT
 
 #endif /* __CONFIG_H */

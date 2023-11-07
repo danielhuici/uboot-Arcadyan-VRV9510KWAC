@@ -44,6 +44,10 @@ static void gpio_init(void)
 	gpio_set_altfunc(48, GPIO_ALTSEL_SET, GPIO_ALTSEL_CLR, GPIO_DIR_IN);
 	/* GPIO 3.1 as output for NAND Read */
 	gpio_set_altfunc(49, GPIO_ALTSEL_SET, GPIO_ALTSEL_CLR, GPIO_DIR_OUT);
+
+	gpio_request(GPIO_SERVICE_LED, "");
+	gpio_request(GPIO_POWER_LED, "");
+	gpio_direction_output(GPIO_POWER_LED, 0);
 }
 
 int board_early_init_f(void)
@@ -63,21 +67,30 @@ int board_early_init_f(void)
 	return 0;
 }
 
+
 int board_late_init(void)
 {
-	gpio_request(GPIO_SERVICE_LED, "");
-	gpio_request(GPIO_POWER_LED, "");
-	gpio_direction_output(GPIO_POWER_LED, 0);
-	if (!gpio_get_value(GPIO_SERVICE_BUTTON)) {
-		printf("Service button pressed! launching firmware via tftpboot...\n");
+#if defined(CONFIG_SYS_BOOT_NANDSPL)
+	char *first_boot = getenv("first-boot");
+	int service_button_pressed = !gpio_get_value(GPIO_SERVICE_BUTTON);
+	
+	if (strcmp(first_boot, "1") == 0) {
 		gpio_direction_output(GPIO_SERVICE_LED, 0);
-		setenv("bootcmd", "tftpboot rescue.bin; bootm $fileaddr");
+		setenv("bootcmd", "run move-boardconfig rescue-tftp");
+	} else if (service_button_pressed) {
+		gpio_direction_output(GPIO_SERVICE_LED, 0);
+		printf("Service button pressed! Launching firmware via tftpboot...\n");
+		setenv("bootcmd", "run rescue-tftp");
 	} else {
-		setenv("bootcmd", "nboot");
+		setenv("bootcmd", "run sysboot");
 	}
+#else 
+	
+#endif
 
 	return 0;
 }
+
 
 int checkboard(void)
 {
